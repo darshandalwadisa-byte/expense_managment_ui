@@ -1,13 +1,16 @@
 import 'package:expense/core/services/firestore_service.dart';
+import 'package:expense/core/storage/app_storage.dart';
 import 'package:expense/core/utils/app_logger.dart';
 import 'package:expense/features/auth/services/auth_service.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
+
+// Helper extension for string if needed, or just handle inline
+extension StringExtension on String {
+  String ifEmpty(String fallback) => isEmpty ? fallback : this;
+}
 
 class ProfileController extends GetxController {
   final AuthService _authService = AuthService();
-  final GetStorage _storage = GetStorage();
 
   final RxString userName = ''.obs;
   final RxString userPhone = ''.obs;
@@ -43,22 +46,24 @@ class ProfileController extends GetxController {
         } else {
           // Fallback to local storage or auth if no firestore doc
           userPhone.value =
-              user.phoneNumber ?? _storage.read('userPhone') ?? 'No Phone';
+              user.phoneNumber ??
+              AppStorage.instance.userPhone.ifEmpty('No Phone');
         }
       } catch (e) {
         AppLogger.error('Error fetching user profile from Firestore: $e');
         // Fallback on error
         userPhone.value =
-            user.phoneNumber ?? _storage.read('userPhone') ?? 'No Phone';
+            user.phoneNumber ??
+            AppStorage.instance.userPhone.ifEmpty('No Phone');
       }
 
-      userAvatar.value = _storage.read('userAvatarPath') ?? '';
+      userAvatar.value = AppStorage.instance.userAvatarPath;
 
       // Load additional data from storage if available
-      points.value = _storage.read('userPoints') ?? 4000;
-      transactionLimit.value = _storage.read('transactionLimit') ?? 200.0;
+      points.value = AppStorage.instance.userPoints;
+      transactionLimit.value = AppStorage.instance.transactionLimit;
       isTransactionLimitEnabled.value =
-          _storage.read('isTransactionLimitEnabled') ?? true;
+          AppStorage.instance.isTransactionLimitEnabled;
     } else {
       AppLogger.warning('No user logged in');
     }
@@ -106,13 +111,13 @@ class ProfileController extends GetxController {
 
   void updateTransactionLimit(double limit) {
     transactionLimit.value = limit;
-    _storage.write('transactionLimit', limit);
+    AppStorage.instance.transactionLimit = limit;
     AppLogger.info("Transaction limit updated to: $limit");
   }
 
   void toggleTransactionLimit(bool isEnabled) {
     isTransactionLimitEnabled.value = isEnabled;
-    _storage.write('isTransactionLimitEnabled', isEnabled);
+    AppStorage.instance.isTransactionLimitEnabled = isEnabled;
     AppLogger.info("Transaction limit enabled: $isEnabled");
   }
 
@@ -120,10 +125,7 @@ class ProfileController extends GetxController {
     try {
       await _authService.signOut();
       // Clear storage
-      _storage.remove('isLoggedIn');
-      _storage.remove('userEmail');
-      _storage.remove('username');
-      _storage.remove('userPhone');
+      await AppStorage.instance.clearAll();
 
       Get.offAllNamed('/login');
     } catch (e) {

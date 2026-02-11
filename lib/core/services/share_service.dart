@@ -34,7 +34,6 @@ class ShareService {
       if (kDebugMode) {
         print('Error sharing screenshot: $e');
       }
-      // Re-throw or handle error as needed for the UI
       rethrow;
     }
   }

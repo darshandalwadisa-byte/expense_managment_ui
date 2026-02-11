@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense/core/storage/app_storage.dart';
+import 'package:expense/core/utils/app_snackbars.dart';
 import 'package:expense/features/auth/services/auth_service.dart';
 import 'package:expense/routes/app_named.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class RegisterController extends GetxController {
   final AuthService _authService = AuthService();
-  final GetStorage _storage = GetStorage();
 
   // Username field
   final usernameController = ''.obs;
@@ -110,6 +110,15 @@ class RegisterController extends GetxController {
     }
   }
 
+  void validateAgreeToTerms() {
+    agreeToTerms.value
+        ? null
+        : AppSnackbars.showError(
+            title: 'Error',
+            message: 'Please accept the Terms & Conditions to continue.',
+          );
+  }
+
   /// Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -139,7 +148,8 @@ class RegisterController extends GetxController {
       isEmailValid.value &&
       isPhoneValid.value &&
       isPasswordValid &&
-      doPasswordsMatch;
+      doPasswordsMatch &&
+      agreeToTerms.value;
 
   /// Validates all fields - call this on button tap
   void validateAllFields() {
@@ -148,6 +158,7 @@ class RegisterController extends GetxController {
     validatePhone(phoneController.value);
     validatePassword(passwordController.value);
     validateConfirmPassword(confirmPasswordController.value);
+    validateAgreeToTerms();
   }
 
   /// Handle register
@@ -181,13 +192,16 @@ class RegisterController extends GetxController {
           });
 
       // Save login state
-      _storage.write('isLoggedIn', true);
-      _storage.write('userEmail', emailController.value.trim());
-      _storage.write('username', usernameController.value.trim());
-
-      Get.offNamed(AppNamed.signupSuccess);
+      AppStorage.instance.isLoggedIn = true;
+      AppStorage.instance.userEmail = emailController.value.trim();
+      AppStorage.instance.username = usernameController.value.trim();
+      AppSnackbars.showSuccess(
+        title: 'Success',
+        message: 'Registration Completed successful',
+      );
+      Get.offAllNamed(AppNamed.signupSuccess);
     } catch (e) {
-      Get.snackbar('Error', "Registration failed");
+      AppSnackbars.showError(title: 'Error', message: 'Registration failed');
     } finally {
       isLoading.value = false;
     }

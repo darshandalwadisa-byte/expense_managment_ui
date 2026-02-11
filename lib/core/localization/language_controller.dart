@@ -1,11 +1,8 @@
+import 'package:expense/core/storage/app_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class LanguageController extends GetxController {
-  final _box = GetStorage();
-  final _key = 'language';
-
   // Supported Locales
   static const List<Map<String, dynamic>> locales = [
     {'name': 'English', 'locale': Locale('en', 'US')},
@@ -14,8 +11,8 @@ class LanguageController extends GetxController {
   ];
 
   Locale get locale {
-    String? langCode = _box.read(_key);
-    if (langCode != null) {
+    String? langCode = AppStorage.instance.language;
+    if (langCode.isNotEmpty) {
       if (langCode == 'hi_IN') return const Locale('hi', 'IN');
       if (langCode == 'gu_IN') return const Locale('gu', 'IN');
     }
@@ -24,7 +21,8 @@ class LanguageController extends GetxController {
 
   void changeLanguage(Locale locale) {
     Get.updateLocale(locale);
-    _box.write(_key, '${locale.languageCode}_${locale.countryCode}');
+    AppStorage.instance.language =
+        '${locale.languageCode}_${locale.countryCode}';
     update();
   }
 

@@ -165,13 +165,7 @@ class _AppTextFieldState extends State<AppTextField> {
     if (widget.isPassword) {
       return GestureDetector(
         onTap: _togglePasswordVisibility,
-        // child: Icon(
-        //   _obscureText
-        //       ? Icons.visibility_off_outlined
-        //       : Icons.visibility_outlined,
-        //   color: AppColors.secondaryText,
-        //   size: 22.sp,
-        // ),
+
         child: _obscureText
             ? AppImageViewer(
                 imagePath: AppImages.hideImage,

@@ -3,13 +3,13 @@ import 'package:expense/core/localization/translations.dart';
 import 'package:expense/core/theme/app_theme.dart';
 import 'package:expense/core/theme/theme_controller.dart';
 import 'package:expense/core/services/app_initializer.dart';
+import 'package:expense/core/storage/app_storage.dart';
 import 'package:expense/core/widgets/app_lock_wrapper.dart';
 import 'package:expense/routes/app_named.dart';
 import 'package:expense/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 void main() async {
   await AppInitializer.init();
@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final box = GetStorage();
-    final bool isLoggedIn = box.read('isLoggedIn') ?? false;
+    final bool isLoggedIn = AppStorage.instance.isLoggedIn;
     final languageController = Get.find<LanguageController>();
     final themeController = Get.find<ThemeController>();
 

@@ -24,8 +24,6 @@ class SignupSuccessfulPage extends StatelessWidget {
             children: [
               // Back button
               16.verticalSpace,
-              _buildBackButton(context),
-
               const Spacer(flex: 2),
 
               // Illustration
@@ -78,20 +76,4 @@ class SignupSuccessfulPage extends StatelessWidget {
   }
 
   /// Build back button
-  Widget _buildBackButton(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: GestureDetector(
-        onTap: () => Get.back(),
-        child: Container(
-          padding: EdgeInsets.all(8.w),
-          child: Icon(
-            Icons.arrow_back_ios,
-            size: 20.sp,
-            color: context.theme.iconTheme.color,
-          ),
-        ),
-      ),
-    );
-  }
 }

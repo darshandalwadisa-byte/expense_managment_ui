@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:expense/core/services/firestore_service.dart';
+import 'package:expense/core/storage/app_storage.dart';
 import 'package:expense/features/auth/services/auth_service.dart';
 import 'package:expense/features/profile/controllers/profile_controller.dart';
 import 'package:expense/features/profile/services/image_storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfileController extends GetxController {
   final ProfileController profileController = Get.find<ProfileController>();
   final AuthService _authService = AuthService();
-  final GetStorage _storage = GetStorage();
   final ImageStorageService _imageStorageService = ImageStorageService();
   final ImagePicker _imagePicker = ImagePicker();
 
@@ -86,8 +85,8 @@ class EditProfileController extends GetxController {
             );
             debugPrint('Image saved locally. Path: $imagePath');
 
-            // Save path to GetStorage
-            _storage.write('userAvatarPath', imagePath);
+            // Save path to AppStorage
+            AppStorage.instance.userAvatarPath = imagePath;
             profileController.userAvatar.value = imagePath;
             debugPrint('Profile photo path saved to storage');
             Get.back();
@@ -136,7 +135,7 @@ class EditProfileController extends GetxController {
         }, SetOptions(merge: true));
 
         profileController.userName.value = nameController.text;
-        _storage.write('username', nameController.text);
+        AppStorage.instance.username = nameController.text;
       }
 
       // Update phone number in Firestore
@@ -146,7 +145,7 @@ class EditProfileController extends GetxController {
         }, SetOptions(merge: true));
 
         profileController.userPhone.value = phoneController.text;
-        _storage.write('userPhone', phoneController.text);
+        AppStorage.instance.userPhone = phoneController.text;
       }
 
       // Note: Email updates require verification and are handled separately

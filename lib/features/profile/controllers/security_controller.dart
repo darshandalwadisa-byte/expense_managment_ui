@@ -2,14 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:expense/core/services/firestore_service.dart';
+import 'package:expense/core/storage/app_storage.dart';
 import 'package:expense/core/utils/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 
 class SecurityController extends GetxController with WidgetsBindingObserver {
-  final GetStorage _storage = GetStorage();
-
   // Rx Variables
   final RxBool isAutoLockEnabled = false.obs;
   final RxInt autoLockTimeout = 120.obs; // Default 2 minutes
@@ -25,8 +23,7 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
 
     // Check auto-lock status synchronously to lock ASAP
-    final bool autoLock = _storage.read('isAppAutoLockEnabled') ?? false;
-    if (autoLock) {
+    if (AppStorage.instance.isAutoLockEnabled) {
       isLocked.value = true;
     }
 
@@ -60,9 +57,9 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
 
   void _loadSettings() async {
     // Load settings from local storage
-    isAutoLockEnabled.value = _storage.read('isAppAutoLockEnabled') ?? false;
-    autoLockTimeout.value = _storage.read('appLockTimeout') ?? 120;
-    pinHash.value = _storage.read('appLockPinHash') ?? '';
+    isAutoLockEnabled.value = AppStorage.instance.isAutoLockEnabled;
+    autoLockTimeout.value = AppStorage.instance.lockTimeout;
+    pinHash.value = AppStorage.instance.pinHash;
 
     // If enabled, lock initially on app start
     if (isAutoLockEnabled.value) {
@@ -80,9 +77,9 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
         pinHash.value = data['appLockPinHash'] ?? pinHash.value;
 
         // Update local storage
-        _storage.write('isAppAutoLockEnabled', isAutoLockEnabled.value);
-        _storage.write('appLockTimeout', autoLockTimeout.value);
-        _storage.write('appLockPinHash', pinHash.value);
+        AppStorage.instance.isAutoLockEnabled = isAutoLockEnabled.value;
+        AppStorage.instance.lockTimeout = autoLockTimeout.value;
+        AppStorage.instance.pinHash = pinHash.value;
       }
     } catch (e) {
       AppLogger.error('Error syncing security settings from Firestore: $e');
@@ -116,8 +113,8 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
     isAutoLockEnabled.value = true;
 
     // Save locally
-    _storage.write('appLockPinHash', hash);
-    _storage.write('isAppAutoLockEnabled', true);
+    AppStorage.instance.pinHash = hash;
+    AppStorage.instance.isAutoLockEnabled = true;
 
     // Save to Firestore
     try {
@@ -151,7 +148,7 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
 
   void autoLockSecondsUpdate(int seconds) async {
     autoLockTimeout.value = seconds;
-    _storage.write('appLockTimeout', seconds);
+    AppStorage.instance.lockTimeout = seconds;
     resetInactivityTimer();
 
     try {
@@ -168,7 +165,7 @@ class SecurityController extends GetxController with WidgetsBindingObserver {
     }
 
     isAutoLockEnabled.value = value;
-    _storage.write('isAppAutoLockEnabled', value);
+    AppStorage.instance.isAutoLockEnabled = value;
 
     if (value) {
       resetInactivityTimer();

@@ -1,14 +1,14 @@
+import 'package:expense/core/storage/app_storage.dart';
+import 'package:expense/core/utils/app_snackbars.dart';
 import 'package:expense/features/auth/services/auth_service.dart';
 import 'package:expense/routes/app_named.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 
 class LoginController extends GetxController {
   final AuthService _authService = AuthService();
-  final GetStorage _storage = GetStorage();
 
   // Email field
   final emailController = ''.obs;
@@ -86,14 +86,19 @@ class LoginController extends GetxController {
         password: passwordController.value,
       );
 
-      // Save login state using GetStorage
-      _storage.write('isLoggedIn', true);
-      _storage.write('userEmail', emailController.value.trim());
-
-      Get.snackbar('Success', 'Logged in successfully');
+      // Save login state using AppStorage
+      AppStorage.instance.isLoggedIn = true;
+      AppStorage.instance.userEmail = emailController.value.trim();
+      AppSnackbars.showSuccess(
+        title: 'Success',
+        message: 'Logged in successfully',
+      );
       Get.offAllNamed(AppNamed.menuPage);
     } catch (e) {
-      Get.snackbar('Error', "Please enter valid email and password");
+      AppSnackbars.showError(
+        title: 'Error',
+        message: 'Please enter valid email and password',
+      );
     } finally {
       isLoading.value = false;
     }

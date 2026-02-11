@@ -25,8 +25,6 @@ class OnboardingPage extends StatelessWidget {
               children: [
                 // Top spacing
                 40.verticalSpace,
-
-                // Main illustration (FIXED HEIGHT instead of Expanded)
                 Center(
                   child: AppImageViewer(
                     imagePath: AppImages.onboardingImage1,

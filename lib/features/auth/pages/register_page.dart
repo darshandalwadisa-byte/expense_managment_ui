@@ -279,7 +279,7 @@ class RegisterPage extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    TextSpan(text: '.'),
+                    const TextSpan(text: '.'),
                   ],
                 ),
               ),
