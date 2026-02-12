@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io';
 import 'package:expense/core/services/firestore_service.dart';
 import 'package:expense/core/storage/app_storage.dart';
+import 'package:expense/core/utils/app_snackbars.dart';
 import 'package:expense/features/auth/services/auth_service.dart';
 import 'package:expense/features/profile/controllers/profile_controller.dart';
 import 'package:expense/features/profile/services/image_storage_service.dart';
@@ -59,18 +60,15 @@ class EditProfileController extends GetxController {
         selectedImage.value = File(pickedFile.path);
       }
     } catch (e) {
-      Get.snackbar(
-        "Error",
-        "Failed to pick image: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppSnackbars.showError(title: "Error", message: "Failed to pick image");
     }
   }
 
   Future<void> saveChanges() async {
     try {
+      bool imageUpdated = false;
+      bool infoUpdated = false;
+
       // Upload image first if selected
       if (selectedImage.value != null) {
         isUploadingImage.value = true;
@@ -89,36 +87,18 @@ class EditProfileController extends GetxController {
             AppStorage.instance.userAvatarPath = imagePath;
             profileController.userAvatar.value = imagePath;
             debugPrint('Profile photo path saved to storage');
-            Get.back();
-            Get.snackbar(
-              "Success",
-              "Profile photo updated successfully",
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.green,
-              colorText: Colors.white,
-              duration: Duration(seconds: 2),
-            );
+            imageUpdated = true;
           } catch (e) {
             debugPrint('Image save error: $e');
-            Get.snackbar(
-              "Upload Failed",
-              "Error: $e",
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-              duration: Duration(seconds: 5),
+            AppSnackbars.showError(
+              title: "Upload Failed",
+              message: "Failed to upload profile photo",
             );
             isUploadingImage.value = false;
             return; // Stop execution if image save fails
           }
         } else {
-          Get.snackbar(
-            "Error",
-            "User not logged in",
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-          );
+          AppSnackbars.showError(title: "Error", message: "User not logged in");
           isUploadingImage.value = false;
           return;
         }
@@ -136,50 +116,27 @@ class EditProfileController extends GetxController {
 
         profileController.userName.value = nameController.text;
         AppStorage.instance.username = nameController.text;
-      }
-
-      // Update phone number in Firestore
-      if (phoneController.text != profileController.userPhone.value) {
-        await FirestoreService.userDoc().set({
-          'phone': phoneController.text,
-        }, SetOptions(merge: true));
-
-        profileController.userPhone.value = phoneController.text;
-        AppStorage.instance.userPhone = phoneController.text;
-      }
-
-      // Note: Email updates require verification and are handled separately
-      // For now, we'll just show a message if email is changed
-      if (emailController.text != profileController.userEmail.value) {
-        Get.snackbar(
-          "Email Update",
-          "Email updates require verification. This feature will be available soon.",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+        infoUpdated = true;
       }
 
       // Refresh profile to reflect changes
       profileController.refreshProfile();
 
       Get.back();
-      Get.snackbar(
-        "Success",
-        "Profile updated successfully",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+
+      if (imageUpdated || infoUpdated) {
+        String message = "Profile updated successfully";
+        if (imageUpdated && !infoUpdated) {
+          message = "Profile photo updated successfully";
+        }
+
+        AppSnackbars.showSuccess(title: "Success", message: message);
+      }
     } catch (e) {
       debugPrint('Save changes error: $e');
-      Get.snackbar(
-        "Error",
-        "Failed to update profile: $e",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: Duration(seconds: 4),
+      AppSnackbars.showError(
+        title: "Error",
+        message: "Failed to update profile: $e",
       );
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:expense/core/constants/app_strings.dart';
 import 'package:expense/core/theme/app_colors.dart';
 import 'package:expense/core/theme/app_text_styles.dart';
@@ -17,7 +18,6 @@ class EditProfilePage extends GetView<EditProfileController> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).cardColor,
-        elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
@@ -91,11 +91,11 @@ class EditProfilePage extends GetView<EditProfileController> {
                           if (controller.isUploadingImage.value)
                             Positioned.fill(
                               child: Container(
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: Colors.black45,
                                   shape: BoxShape.circle,
                                 ),
-                                child: Center(
+                                child: const Center(
                                   child: CircularProgressIndicator(
                                     strokeWidth: 3,
                                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -168,9 +168,22 @@ class EditProfilePage extends GetView<EditProfileController> {
     }
 
     // Show existing avatar from profile
-    final avatarUrl = controller.profileController.userAvatar.value;
-    if (avatarUrl.isNotEmpty) {
-      return DecorationImage(image: NetworkImage(avatarUrl), fit: BoxFit.cover);
+    final avatarPath = controller.profileController.userAvatar.value;
+    if (avatarPath.isNotEmpty) {
+      ImageProvider? imageProvider;
+
+      if (avatarPath.startsWith('http')) {
+        imageProvider = NetworkImage(avatarPath);
+      } else {
+        final file = File(avatarPath);
+        if (file.existsSync()) {
+          imageProvider = FileImage(file);
+        }
+      }
+
+      if (imageProvider != null) {
+        return DecorationImage(image: imageProvider, fit: BoxFit.cover);
+      }
     }
 
     return null;

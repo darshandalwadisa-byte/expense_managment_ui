@@ -3,8 +3,6 @@ import 'package:expense/core/utils/app_logger.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageStorageService {
-  /// Upload profile image to local storage
-  /// Returns the local file path of the saved image
   Future<String> uploadProfileImage(File imageFile, String userId) async {
     try {
       AppLogger.info('Saving profile image locally for user: $userId');
@@ -27,7 +25,7 @@ class ImageStorageService {
       }
 
       // Define the file path
-      final String fileName = 'profile.jpg';
+      const String fileName = 'profile.jpg';
       final String localPath = '${userDir.path}/$fileName';
 
       // Copy the image file to the local directory

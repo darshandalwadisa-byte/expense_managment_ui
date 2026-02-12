@@ -60,14 +60,43 @@ class AnalyticsPage extends GetView<AnalyticsController> {
             ),
             SizedBox(height: 8.h),
             // Time Filter Tabs
-            Container(
-              decoration: BoxDecoration(color: context.theme.cardColor),
-              child: const TimeFilterTabsWidget(),
-            ),
-            Container(
-              decoration: BoxDecoration(color: context.theme.cardColor),
-              child: const AnalyticsBarChartWidget(),
-            ),
+            Obx(() {
+              // Show loading state if data is loading
+              if (controller.isLoading.value) {
+                return SizedBox(
+                  height: 300.h,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
+
+              // Show empty state if no transactions
+              if (controller.transactions.isEmpty) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 24.h),
+                  color: context.theme.cardColor,
+                  child: const EmptyStateWidget(
+                    imagePath: AppImages.onboardingImage1,
+                    message: "No transactions found",
+                    subMessage: "Your transaction history will appear here.",
+                  ),
+                );
+              }
+
+              // Show filter and chart if data exists
+              return Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(color: context.theme.cardColor),
+                    child: const TimeFilterTabsWidget(),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(color: context.theme.cardColor),
+                    child: const AnalyticsBarChartWidget(),
+                  ),
+                ],
+              );
+            }),
             SizedBox(height: 8.h),
             // Trading History Section
             Container(
@@ -141,14 +170,14 @@ class AnalyticsPage extends GetView<AnalyticsController> {
           SizedBox(height: 12.h),
           Obx(() {
             if (controller.isLoading.value) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (controller.errorMessage.isNotEmpty) {
               return Center(
                 child: Text(
                   controller.errorMessage.value,
-                  style: TextStyle(color: Colors.red),
+                  style: const TextStyle(color: Colors.red),
                 ),
               );
             }

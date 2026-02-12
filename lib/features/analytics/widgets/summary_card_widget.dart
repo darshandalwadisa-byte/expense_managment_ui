@@ -38,7 +38,7 @@ class SummaryCardWidget extends StatelessWidget {
           children: [
             Container(
               width: 32.w,
-              height: 56.w,
+              height: 50.w,
               decoration: BoxDecoration(
                 color: iconColor.withValues(alpha: 0.20),
                 borderRadius: BorderRadius.circular(12.r),

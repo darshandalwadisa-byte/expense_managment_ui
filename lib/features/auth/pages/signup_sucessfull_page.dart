@@ -74,6 +74,4 @@ class SignupSuccessfulPage extends StatelessWidget {
       ),
     );
   }
-
-  /// Build back button
 }
